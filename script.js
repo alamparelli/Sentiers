@@ -47,11 +47,15 @@ const elements = {
     closeMobileDetails: document.getElementById('closeMobileDetails'),
     
     // Bouton retour en haut
-    backToTopBtn: document.getElementById('backToTopBtn')
+    backToTopBtn: document.getElementById('backToTopBtn'),
+    
+    // Theme toggle
+    themeToggle: document.getElementById('themeToggle')
 };
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     setupEventListeners();
     setupScrollHandling();
     loadTrailsData();
@@ -123,6 +127,9 @@ function setupEventListeners() {
     
     // Bouton retour en haut
     elements.backToTopBtn.addEventListener('click', scrollToTop);
+    
+    // Theme toggle
+    elements.themeToggle.addEventListener('click', toggleTheme);
 }
 
 // Configuration de la gestion du scroll
@@ -278,22 +285,26 @@ function renderDesktopTable() {
             row.classList.add('bg-blue-50');
         }
         
+        const safeCode = escapeHtml(trail.code);
+        const safeName = escapeHtml(trail.name);
+        const safeStartingPoint = escapeHtml(trail.starting_point);
+        
         row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${trail.code}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${trail.name}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${safeCode}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${safeName}</td>
             <td class="px-6 py-4 whitespace-nowrap">
                 ${getTypeBadge(trail.type)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 ${getDifficultyIcons(trail.difficulty)}
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
+            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                 <div class="flex items-center">
-                    <svg class="h-4 w-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    ${trail.starting_point}
+                    ${safeStartingPoint}
                 </div>
             </td>
         `;
@@ -342,19 +353,28 @@ function renderMobileCards() {
     });
 }
 
+// Fonction pour échapper le HTML et prévenir XSS
+function escapeHtml(text) {
+    if (typeof text !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Helpers pour l'affichage
 function getTypeBadge(type) {
-    if (type === 'Walking') {
-        return '<span class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Randonnée</span>';
-    } else if (type === 'Cultural Heritage') {
-        return '<span class="inline-flex px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded">Patrimoine</span>';
+    const safeType = escapeHtml(type);
+    if (safeType === 'Walking') {
+        return '<span class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded dark:bg-green-900 dark:text-green-200">Randonnée</span>';
+    } else if (safeType === 'Cultural Heritage') {
+        return '<span class="inline-flex px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded dark:bg-purple-900 dark:text-purple-200">Patrimoine</span>';
     }
     return '';
 }
 
 function getDifficultyIcons(difficulty) {
-    const icons = '⚡'.repeat(difficulty);
-    return `<span class="difficulty-icon">${icons}</span>`;
+    const safeIcons = '⚡'.repeat(Math.max(0, Math.min(3, parseInt(difficulty) || 0)));
+    return `<span class="difficulty-icon">${safeIcons}</span>`;
 }
 
 // Affichage des détails (desktop)
@@ -376,12 +396,23 @@ function showMobileTrailDetails(trail) {
 
 // Génération du HTML des détails
 function generateTrailDetailsHTML(trail) {
+    const safeName = escapeHtml(trail.name);
+    const safeCode = escapeHtml(trail.code);
+    const safeStartingPoint = escapeHtml(trail.starting_point);
+    const safeDistance = escapeHtml(trail.distance);
+    const safeDuration = escapeHtml(trail.duration);
+    const safeAltitude = escapeHtml(trail.altitude);
+    const safeParking = escapeHtml(trail.parking);
+    const safeDescription = escapeHtml(trail.description);
+    const safeImageUrl = escapeHtml(trail.image_url);
+    const safeUrl = escapeHtml(trail.url);
+    
     return `
         <div class="space-y-6">
             <!-- Image -->
             <div class="relative">
                 ${trail.image_url ? `
-                    <img src="${trail.image_url}" alt="${trail.name}" 
+                    <img src="${safeImageUrl}" alt="${safeName}" 
                          class="w-full h-48 object-cover rounded-lg"
                          onerror="this.parentElement.innerHTML = getImagePlaceholder();">
                 ` : getImagePlaceholder()}
@@ -389,74 +420,74 @@ function generateTrailDetailsHTML(trail) {
             
             <!-- Informations principales -->
             <div>
-                <h4 class="text-xl font-semibold text-gray-900 mb-2">${trail.name}</h4>
-                <p class="text-sm text-blue-600 mb-4">Code: ${trail.code}</p>
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">${safeName}</h4>
+                <p class="text-sm text-blue-600 dark:text-blue-400 mb-4">Code: ${safeCode}</p>
                 
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Type</span>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Type</span>
                         ${getTypeBadge(trail.type)}
                     </div>
                     
-                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Difficulté</span>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Difficulté</span>
                         <div class="flex items-center">
                             ${getDifficultyIcons(trail.difficulty)}
-                            <span class="ml-2 text-sm text-gray-700">Niveau ${trail.difficulty}</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-200">Niveau ${parseInt(trail.difficulty) || 1}</span>
                         </div>
                     </div>
                     
-                    <div class="py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Point de départ</span>
+                    <div class="py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Point de départ</span>
                         <div class="flex items-center mt-1">
-                            <svg class="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="text-sm text-gray-700">${trail.starting_point}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-200">${safeStartingPoint}</span>
                         </div>
                     </div>
                     
-                    ${trail.distance ? `
-                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Distance</span>
-                        <span class="text-sm text-gray-700">${trail.distance}</span>
+                    ${safeDistance ? `
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Distance</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200">${safeDistance}</span>
                     </div>
                     ` : ''}
                     
-                    ${trail.duration ? `
-                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Durée</span>
-                        <span class="text-sm text-gray-700">${trail.duration}</span>
+                    ${safeDuration ? `
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Durée</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200">${safeDuration}</span>
                     </div>
                     ` : ''}
                     
-                    ${trail.altitude ? `
-                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Altitude</span>
-                        <span class="text-sm text-gray-700">${trail.altitude}</span>
+                    ${safeAltitude ? `
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Altitude</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200">${safeAltitude}</span>
                     </div>
                     ` : ''}
                     
-                    ${trail.parking ? `
-                    <div class="py-2 border-b border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Parking</span>
-                        <p class="text-sm text-gray-700 mt-1">${trail.parking}</p>
+                    ${safeParking ? `
+                    <div class="py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Parking</span>
+                        <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">${safeParking}</p>
                     </div>
                     ` : ''}
                 </div>
                 
-                ${trail.description ? `
+                ${safeDescription ? `
                 <div class="pt-4">
-                    <h5 class="text-sm font-medium text-gray-600 mb-2">Description</h5>
-                    <p class="text-sm text-gray-700 leading-relaxed">${trail.description}</p>
+                    <h5 class="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Description</h5>
+                    <p class="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">${safeDescription}</p>
                 </div>
                 ` : ''}
                 
                 <!-- Bouton lien externe -->
                 <div class="pt-6">
-                    <a href="${trail.url}" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                         </svg>
@@ -566,4 +597,28 @@ function scrollToTop() {
         top: 0,
         behavior: 'smooth'
     });
+}
+
+// Gestion du thème dark/light
+function initializeTheme() {
+    // Récupérer la préférence stockée ou utiliser celle du système
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
+
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    
+    // Sauvegarder la préférence
+    if (document.documentElement.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
 }
