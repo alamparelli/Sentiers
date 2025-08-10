@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorateur de Sentiers Mullerthal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'trail-green': '#16a34a',
+                        'trail-purple': '#7c3aed'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .difficulty-icon {
+            color: #eab308;
+        }
+        .trail-card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .trail-card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar Desktop -->
+        <div id="sidebar" class="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200 p-6">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">🥾 Sentiers Mullerthal</h1>
+                <p class="text-gray-600 mt-2">Explorez les sentiers locaux du Luxembourg</p>
+            </div>
+            
+            <!-- Filtres -->
+            <div class="space-y-6 flex-1">
+                <!-- Recherche -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Nom, code, lieu..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Difficulté -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Difficulté</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" value="1" class="difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Niveau 1 <span class="difficulty-icon">⚡</span></span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="2" class="difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Niveau 2 <span class="difficulty-icon">⚡⚡</span></span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="3" class="difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Niveau 3 <span class="difficulty-icon">⚡⚡⚡</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Type</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" value="Walking" class="type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Randonnée</span>
+                            <span class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Marche</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="Cultural Heritage" class="type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Patrimoine culturel</span>
+                            <span class="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">Culture</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Lieu -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Lieu de départ</label>
+                    <select id="locationFilter" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tous les lieux</option>
+                    </select>
+                </div>
+
+                <!-- Distance -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Distance</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" value="0-5" class="distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Moins de 5 km</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="5-10" class="distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">5-10 km</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="10+" class="distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Plus de 10 km</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Durée -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Durée</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" value="0-1h" class="duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Moins d'1h</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="1h-2h" class="duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">1h - 2h</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="2h-3h" class="duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">2h - 3h</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="3h+" class="duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm">Plus de 3h</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Reset -->
+                <button id="resetFilters" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Réinitialiser
+                </button>
+            </div>
+        </div>
+
+        <!-- Bouton filtres mobile -->
+        <button id="mobileFilterBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-lg shadow-lg border">
+            <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+            </svg>
+        </button>
+
+        <!-- Overlay mobile sidebar -->
+        <div id="mobileSidebarOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
+            <div id="mobileSidebar" class="absolute left-0 top-0 h-full w-80 bg-white p-6 transform -translate-x-full transition-transform duration-300">
+                <div class="mb-6 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Filtres</h2>
+                    <button id="closeMobileSidebar" class="p-2">
+                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Mêmes filtres que desktop -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+                        <div class="relative">
+                            <input type="text" id="mobileSearchInput" placeholder="Nom, code, lieu..." 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Difficulté</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" value="1" class="mobile-difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Niveau 1 <span class="difficulty-icon">⚡</span></span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="2" class="mobile-difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Niveau 2 <span class="difficulty-icon">⚡⚡</span></span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="3" class="mobile-difficulty-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Niveau 3 <span class="difficulty-icon">⚡⚡⚡</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Type</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" value="Walking" class="mobile-type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Randonnée</span>
+                                <span class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Marche</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="Cultural Heritage" class="mobile-type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Patrimoine culturel</span>
+                                <span class="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">Culture</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lieu de départ</label>
+                        <select id="mobileLocationFilter" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Tous les lieux</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Distance</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" value="0-5" class="mobile-distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Moins de 5 km</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="5-10" class="mobile-distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">5-10 km</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="10+" class="mobile-distance-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Plus de 10 km</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Durée</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" value="0-1h" class="mobile-duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Moins d'1h</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="1h-2h" class="mobile-duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">1h - 2h</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="2h-3h" class="mobile-duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">2h - 3h</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="3h+" class="mobile-duration-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Plus de 3h</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button id="mobileResetFilters" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone principale -->
+        <div class="flex-1 lg:flex lg:flex-col">
+            <!-- Header -->
+            <div class="bg-white border-b border-gray-200 px-6 py-4 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <h2 id="resultsCount" class="text-lg font-semibold text-gray-900">Sentiers (76)</h2>
+                    <div id="loadingSpinner" class="hidden">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="flex-1 lg:flex">
+                <!-- Zone des résultats -->
+                <div class="flex-1 p-6 lg:p-8">
+                    <!-- État de chargement -->
+                    <div id="loadingState" class="flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            <p class="text-gray-600">Chargement des sentiers...</p>
+                        </div>
+                    </div>
+
+                    <!-- État d'erreur -->
+                    <div id="errorState" class="hidden flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <svg class="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <p class="text-gray-600">Erreur lors du chargement des données</p>
+                        </div>
+                    </div>
+
+                    <!-- Tableau Desktop -->
+                    <div id="desktopTable" class="hidden lg:block">
+                        <div class="overflow-hidden bg-white shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-300">
+                                <thead class="bg-gray-50 sticky top-0">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Code</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Nom</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Difficulté</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Point de départ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Les lignes seront générées par JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Cartes Mobile -->
+                    <div id="mobileCards" class="lg:hidden space-y-4">
+                        <!-- Les cartes seront générées par JavaScript -->
+                    </div>
+
+                    <!-- État vide -->
+                    <div id="emptyState" class="hidden flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-3-8v4m4 4l.707.707M15 8h.01M9 8h.01m8 4h.01M7 12h.01"></path>
+                            </svg>
+                            <p class="text-gray-600">Aucun sentier trouvé</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panneau de détails -->
+                <div id="detailsPanel" class="hidden lg:w-96 bg-white border-l border-gray-200 p-6 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Détails du sentier</h3>
+                        <button id="closeDetails" class="p-2 text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="detailsContent">
+                        <!-- Le contenu sera généré par JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal détails mobile -->
+        <div id="mobileDetailsModal" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="absolute inset-0 overflow-y-auto">
+                <div class="min-h-full flex items-end sm:items-center justify-center p-4">
+                    <div class="bg-white rounded-t-lg sm:rounded-lg w-full max-w-lg">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Détails du sentier</h3>
+                                <button id="closeMobileDetails" class="p-2 text-gray-400 hover:text-gray-600">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div id="mobileDetailsContent">
+                                <!-- Le contenu sera généré par JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton retour en haut -->
+        <button id="backToTopBtn" class="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 opacity-0 invisible z-50">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
