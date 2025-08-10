@@ -30,7 +30,7 @@ Une interface web moderne et responsive pour explorer les sentiers locaux du Mul
 
 ## 🚀 Démo en ligne
 
-**[🌐 Voir la démo](https://alamparelli.github.io/mullerthal-trail-explorer/)**
+**[🌐 Voir la démo](https://alamparelli.github.io/Sentiers/)**
 
 ## 📊 Données
 
@@ -49,8 +49,8 @@ Une interface web moderne et responsive pour explorer les sentiers locaux du Mul
 
 1. Cloner le dépôt
 ```bash
-git clone https://github.com/alamparelli/mullerthal-trail-explorer.git
-cd mullerthal-trail-explorer
+git clone https://github.com/alamparelli/Sentiers.git
+cd Sentiers
 ```
 
 2. Servir les fichiers (nécessaire pour le chargement JSON)

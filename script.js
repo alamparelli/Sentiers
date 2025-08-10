@@ -50,7 +50,8 @@ const elements = {
     backToTopBtn: document.getElementById('backToTopBtn'),
     
     // Theme toggle
-    themeToggle: document.getElementById('themeToggle')
+    themeToggle: document.getElementById('themeToggle'),
+    mobileThemeToggle: document.getElementById('mobileThemeToggle')
 };
 
 // Initialisation
@@ -130,6 +131,7 @@ function setupEventListeners() {
     
     // Theme toggle
     elements.themeToggle.addEventListener('click', toggleTheme);
+    elements.mobileThemeToggle.addEventListener('click', toggleTheme);
 }
 
 // Configuration de la gestion du scroll
@@ -278,11 +280,11 @@ function renderDesktopTable() {
     
     filteredTrails.forEach(trail => {
         const row = document.createElement('tr');
-        row.className = 'hover:bg-blue-50 cursor-pointer transition-colors';
+        row.className = 'hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors';
         row.addEventListener('click', () => showTrailDetails(trail));
         
         if (selectedTrail && selectedTrail.code === trail.code) {
-            row.classList.add('bg-blue-50');
+            row.classList.add('bg-blue-50', 'dark:bg-gray-700');
         }
         
         const safeCode = escapeHtml(trail.code);
@@ -319,7 +321,7 @@ function renderMobileCards() {
     
     filteredTrails.forEach(trail => {
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow border trail-card-hover cursor-pointer p-3 sm:p-4';
+        card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 trail-card-hover cursor-pointer p-3 sm:p-4';
         card.addEventListener('click', () => showMobileTrailDetails(trail));
         
         card.innerHTML = `
@@ -329,8 +331,8 @@ function renderMobileCards() {
                         <span class="text-sm font-medium text-blue-600">${trail.code}</span>
                         ${getTypeBadge(trail.type)}
                     </div>
-                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 leading-tight">${trail.name}</h3>
-                    <div class="flex items-start text-sm text-gray-500 mb-2">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2 leading-tight">${trail.name}</h3>
+                    <div class="flex items-start text-sm text-gray-500 dark:text-gray-400 mb-2">
                         <svg class="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -339,11 +341,11 @@ function renderMobileCards() {
                     </div>
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
                         <div class="flex items-center">
-                            <span class="text-sm text-gray-600 mr-1">Difficulté:</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-300 mr-1">Difficulté:</span>
                             ${getDifficultyIcons(trail.difficulty)}
                         </div>
-                        ${trail.distance ? `<span class="text-sm text-gray-600">${trail.distance}</span>` : ''}
-                        ${trail.duration ? `<span class="text-sm text-gray-600">${trail.duration}</span>` : ''}
+                        ${trail.distance ? `<span class="text-sm text-gray-600 dark:text-gray-300">${trail.distance}</span>` : ''}
+                        ${trail.duration ? `<span class="text-sm text-gray-600 dark:text-gray-300">${trail.duration}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -501,8 +503,8 @@ function generateTrailDetailsHTML(trail) {
 
 function getImagePlaceholder() {
     return `
-        <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-            <div class="text-center text-gray-400">
+        <div class="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+            <div class="text-center text-gray-400 dark:text-gray-500">
                 <svg class="h-12 w-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3"></path>
                 </svg>
